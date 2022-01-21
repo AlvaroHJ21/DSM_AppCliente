@@ -7,6 +7,8 @@ import androidx.appcompat.widget.SearchView
 import androidx.appcompat.widget.SearchView.OnQueryTextListener
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.RecyclerView
+import androidx.viewpager2.widget.ViewPager2
 import com.example.dsm_appcliente.R
 import com.example.dsm_appcliente.databinding.FragmentMainSearchBinding
 import com.example.dsm_appcliente.databinding.FragmentSearchBinding
@@ -24,6 +26,8 @@ class MainSearchFragment : Fragment(R.layout.fragment_main_search) {
         mBinding.fabSearch.setOnClickListener {
             findNavController().navigate(R.id.action_mainSearchFragment_to_searchedProductsFragment)
         }
+
+
 
         setHasOptionsMenu(true)
         setupTabs()
@@ -49,6 +53,9 @@ class MainSearchFragment : Fragment(R.layout.fragment_main_search) {
     private fun setupTabs() {
         val adapter = activity?.let { ViewPagerAdapter(it.supportFragmentManager, it.lifecycle) }
         mBinding.viewPager.adapter = adapter
+        //mBinding.viewPager.reduceDragSensitivity()
+
+        mBinding.viewPager.requestDisallowInterceptTouchEvent(true)
 
         TabLayoutMediator(mBinding.tabs, mBinding.viewPager) { tab, position ->
             when (position) {
@@ -56,5 +63,16 @@ class MainSearchFragment : Fragment(R.layout.fragment_main_search) {
                 1 -> tab.text = "Tiendas Cercanas"
             }
         }.attach()
+    }
+
+    fun ViewPager2.reduceDragSensitivity() {
+        val recyclerViewField = ViewPager2::class.java.getDeclaredField("mRecyclerView")
+        recyclerViewField.isAccessible = true
+        val recyclerView = recyclerViewField.get(this) as RecyclerView
+
+        val touchSlopField = RecyclerView::class.java.getDeclaredField("mTouchSlop")
+        touchSlopField.isAccessible = true
+        val touchSlop = touchSlopField.get(recyclerView) as Int
+        touchSlopField.set(recyclerView, touchSlop * 6) // "6" was obtained experimentally
     }
 }
